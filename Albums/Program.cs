@@ -10,7 +10,7 @@ namespace Albums
     {
         static void Main(string[] args)
         {
-           // GetInfoAboutAlbum(4);
+            // GetInfoAboutAlbum(4);
             GenerateTrackListsOfAllAlbums();
 
             Console.ReadLine();
@@ -712,7 +712,7 @@ namespace Albums
             List<Album> albums = GenerateAlbums();
             List<Track> tracks = GenerateTracks();
 
-            
+
             foreach (var album in albums)
             {
                 Console.WriteLine($"Album {album.AlbumName} made by {album.ArtistName} contains songs:");
@@ -725,8 +725,5 @@ namespace Albums
             }
 
         }
-
-        // 7. EF + LINQ – korzystaj z bazy AdventureWorks2012, wyświetl recenzje produktów – join!@
-
     }
 }

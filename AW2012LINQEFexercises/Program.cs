@@ -11,11 +11,13 @@ namespace AW2012LINQEFexercises
     {
         static void Main(string[] args)
         {
-            ShowProductsSalesByYear();
+            ShowAmountOfShopsPerCity();
 
+
+            Console.WriteLine("finito");
             Console.ReadLine();
         }
-
+        
         // 7. EF + LINQ – korzystaj z bazy AdventureWorks2012, wyświetl recenzje produktów – join!@
         private static void ShowProductsReviews()
         {
@@ -78,16 +80,16 @@ namespace AW2012LINQEFexercises
             using (AW2012Context DbContext = new AW2012Context())
             {
                 var SoldProducts = from pr in DbContext.Products
-                                  join sod in DbContext.SalesOrderDetails
-                                  on pr.ProductID equals sod.ProductID
-                                  join soh in DbContext.SalesOrderHeaders
-                                  on sod.SalesOrderID equals soh.SalesOrderID
-                                  select new
-                                  {
-                                      soh.OrderDate,
-                                      pr.Name,
-                                      sod.OrderQty
-                                  };
+                                   join sod in DbContext.SalesOrderDetails
+                                   on pr.ProductID equals sod.ProductID
+                                   join soh in DbContext.SalesOrderHeaders
+                                   on sod.SalesOrderID equals soh.SalesOrderID
+                                   select new
+                                   {
+                                       soh.OrderDate,
+                                       pr.Name,
+                                       sod.OrderQty
+                                   };
 
                 var productsInYear = SoldProducts.GroupBy(x => x.OrderDate.Year).ToList();
                 foreach (var year in productsInYear)
@@ -105,10 +107,64 @@ namespace AW2012LINQEFexercises
                     Console.WriteLine($"{Environment.NewLine}" + $"{Environment.NewLine}");
                 }
             }
-            Console.WriteLine("finito");
+            
         }
 
         // 10. Wyświetl raport wydanych pieniędzy przez customera, od najbardziej
         // dochodowych Customerów – interesuje nas tylko pierwszych TOP 10 najważniejszych klientów
+
+        private static void Display10MostValuableClients()
+        {
+            using (AW2012Context dbContext = new AW2012Context())
+            {
+                var Transactions = from soh in dbContext.SalesOrderHeaders                              
+                              join per in dbContext.People
+                              on soh.CustomerID equals per.BusinessEntityID                              
+                              select new
+                              {
+                                  per.BusinessEntityID,
+                                  per.LastName,
+                                  per.FirstName,
+                                  soh.TotalDue
+                              };
+                var TransactsGroupped = Transactions.GroupBy(c => c.BusinessEntityID);
+                var valuableClients = TransactsGroupped.OrderByDescending(c => c.Sum(t => t.TotalDue)).Take(10);
+                foreach (var cl in valuableClients)
+                {
+                    var client = cl.First();
+                    var amountSpent = cl.Sum(t => t.TotalDue);
+                    Console.WriteLine($"Client {client.FirstName} {client.LastName} made orders for ${amountSpent}");
+                }
+            }
+        }
+
+
+        // 11. Ile sklepów mamy w danym mieście w bazie AdventureWorks2012?
+
+        private static void ShowAmountOfShopsPerCity()
+        {
+            using(AW2012Context dbContext = new AW2012Context())
+            {
+                var Shops = from st in dbContext.Stores
+                            join bea in dbContext.BusinessEntityAddresses
+                            on st.BusinessEntityID equals bea.BusinessEntityID
+                            join ad in dbContext.Addresses
+                            on bea.AddressID equals ad.AddressID                           
+                            select new
+                            {
+                                st.Name,
+                                ad.City,
+                                ad.AddressID
+                            };
+                var ShopsGrouppedByCity = Shops.GroupBy(x => x.City);
+                foreach (var city in ShopsGrouppedByCity)
+                {
+                    
+                    Console.WriteLine($"{city.Key, -25}  {city.Select(x=>x.Name).Count()} shop(s)");
+                }
+            }
+        }
+
+
     }
 }
